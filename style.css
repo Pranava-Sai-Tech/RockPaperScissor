@@ -11,8 +11,17 @@ html {
 * {
   margin: 0;
   padding: 0;
+  max-width: 100%;
 }
 body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers everything vertically */
+  align-items: center;
+  height: 100vh; /* Ensures full viewport height */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrolling */
   background: #24272e;
   color: #fff;
   font-family: "Roboto", sans-serif;
@@ -30,7 +39,7 @@ a:hover {
 }
 header {
   background: #fff;
-  padding: 20px;
+  padding: 10px;
 }
 header h1 {
   color: #444;
@@ -115,4 +124,93 @@ header h1 {
 sup {
   margin: 0;
   padding: 0;
+}
+
+@media (max-width: 1024px) {
+  header {
+    background: #fff;
+    padding: 10px;
+  }
+  header h1 {
+    color: #444;
+    text-align: center;
+    font-weight: 100;
+    font-size: 55px;
+  }
+  .score-board {
+    width: 700px !important;
+    font-size: 100px !important;
+  }
+  #user-label {
+    position: absolute;
+    font-size: 30px;
+    top: 50%;
+    left: -5%;
+    transform: translate(-10%, -50%);
+  }
+  #computer-label {
+    position: absolute;
+    font-size: 30px;
+    top: 50%;
+    right: -5%;
+    transform: translate(10%, -50%);
+  }
+  .result {
+    font-weight: 300;
+    text-align: center;
+    font-size: 55px;
+    line-height: 40px;
+  }
+  .result {
+    line-height: 100px;
+  }
+  .choices {
+    margin: 0 auto;
+    text-align: center;
+    padding: 40px 0;
+  }
+  .choice {
+    display: inline-block;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    padding: 20px;
+    margin: auto 10px;
+    transition: all 0.3s ease;
+  }
+  .choice img {
+    filter: invert(100%);
+    width: 80px;
+    height: 80px;
+  }
+  #action-message {
+    text-align: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 40px 0;
+    font-size: 30px;
+  }
+
+}
+
+/* Adjust for tablets & larger mobiles (768px) */
+@media (max-width: 768px) {
+  .score-board {
+      width: 240px;
+      font-size: 30px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+  }
+}
+
+/* Adjust for small mobile screens (480px and below) */
+@media (max-width: 480px) {
+  .score-board {
+      width: 220px;
+      font-size: 28px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+  }
 }
