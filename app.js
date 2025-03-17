@@ -1,108 +1,155 @@
-// cache the dom (storing for future use)
-// & reset everything to 0 value
+// Cache the DOM & reset everything to 0
 let userScore = 0;
 let computerScore = 0;
+let gameEnded = false; // Prevents multiple win messages
+
 const userScore_span = document.getElementById('user-score');
 const computerScore_span = document.getElementById('computer-score');
-const scoreBoard_div = document.querySelector('.score-board');
 const result_div = document.querySelector('.result');
 const rock_div = document.getElementById('rock');
 const paper_div = document.getElementById('paper');
 const scissors_div = document.getElementById('scissors');
+const newGameBtn = document.getElementById("new-game");
 
-// set up the core function for the computer that will use math.random to loop through an array and return that value
+// Function to get computer's choice
 function getComputerChoice() {
-const choices = ['rock', 'paper', 'scissors'];
-const randomNumber = Math.floor(Math.random() * 3);
-return choices[randomNumber];
+    const choices = ['rock', 'paper', 'scissors'];
+    return choices[Math.floor(Math.random() * 3)];
 }
 
-// similar to convertcase but just takes lowercase and replaces with titlecase
-function convertCase(anythingIwant) {
-if (anythingIwant === 'paper') return 'Paper';
-if (anythingIwant === 'scissors') return 'Scissors';
-return 'Rock';
+// Convert choice to title case
+function convertCase(choice) {
+    return choice.charAt(0).toUpperCase() + choice.slice(1);
 }
 
-// Winning Condition - this handles what happens when the user clicks one of the choices where the value is them passed through as a parameter
+// Celebration function & End Game
+function showEndMessage(message, emoji) {
+    if (gameEnded) return; // Prevent multiple messages
+    gameEnded = true;
+
+    const endGameDiv = document.createElement("div");
+    endGameDiv.classList.add("end-game");
+    endGameDiv.innerHTML = `<h2>${emoji} ${message} ${emoji}</h2>`;
+    document.body.appendChild(endGameDiv);
+
+    // Disable buttons
+    rock_div.style.pointerEvents = "none";
+    paper_div.style.pointerEvents = "none";
+    scissors_div.style.pointerEvents = "none";
+
+    createFallingEffects();
+
+    // Add "Start New Game" button
+    const restartBtn = document.createElement("button");
+    restartBtn.innerText = "Start New Game";
+    restartBtn.classList.add("restart-btn");
+    restartBtn.onclick = resetGame;
+    document.body.appendChild(restartBtn);
+}
+
+// Function to create animated falling effects
+function createFallingEffects() {
+    for (let i = 0; i < 40; i++) {
+        const effect = document.createElement("span");
+        effect.classList.add("falling-effect");
+
+        // Randomly select an effect symbol
+        const symbols = ["🌸", "⭐", "✨"];
+        effect.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+
+        // Random position and animation
+        effect.style.left = `${Math.random() * 100}vw`;
+        effect.style.animationDuration = `${Math.random() * 3 + 2}s`; // Random fall speed
+        effect.style.animationDelay = `${Math.random()}s`;
+
+        document.body.appendChild(effect);
+
+        // Remove after animation ends
+        setTimeout(() => {
+            effect.remove();
+        }, 4000);
+    }
+}
+
+// Reset game
+function resetGame() {
+    userScore = 0;
+    computerScore = 0;
+    gameEnded = false; // Reset game state
+
+    userScore_span.innerHTML = userScore;
+    computerScore_span.innerHTML = computerScore;
+    result_div.innerHTML = `<p>Game restarted. Make your move!</p>`;
+
+    // Enable buttons
+    rock_div.style.pointerEvents = "auto";
+    paper_div.style.pointerEvents = "auto";
+    scissors_div.style.pointerEvents = "auto";
+
+    // Remove end game message & restart button
+    document.querySelector(".end-game")?.remove();
+    document.querySelector(".restart-btn")?.remove();
+}
+
+// Winning function
 function win(user, computer) {
-userScore++;
-// console.log('user score is ' + userScore + ' ' + user);
-userScore_span.innerHTML = userScore;
-const userName = ' (user)'.fontsize(3).sup();
-const compName = ' (comp)'.fontsize(3).sup();
-result_div.innerHTML = `<p>${convertCase(user)}${userName} beats ${convertCase(computer)}${compName}. You win!</p>`;
-const roundStatus = document.getElementById(user);
-roundStatus.classList.add('winningStyles');
-setTimeout(() => roundStatus.classList.remove('winningStyles'), 300);
+    if (gameEnded) return; // Prevent extra clicks
+    userScore++;
+    userScore_span.innerHTML = userScore;
+    result_div.innerHTML = `<p>${convertCase(user)} (user) beats ${convertCase(computer)} (comp). You win!</p>`;
+
+    if (userScore === 7) {
+        showEndMessage("🎉 Congratulations! You Win! 🎉", "🎉");
+    }
 }
-// Losing Condition - this handles what happens when the user clicks one of the choices where the value is them passed through as a parameter
+
+// Losing function
 function loses(user, computer) {
-computerScore++;
-// console.log('computer score is ' + computerScore + ' ' + computer);
-computerScore_span.innerHTML = computerScore;
-const userName = ' (user)'.fontsize(3).sup();
-const compName = ' (comp)'.fontsize(3).sup();
-result_div.innerHTML = `<p>${convertCase(computer)}${compName} beats ${convertCase(user)}${userName}. You lose!</p>`;
-const roundStatus = document.getElementById(user);
-roundStatus.classList.add('losingStyles');
-setTimeout(() => roundStatus.classList.remove('losingStyles'), 300);
-}
-// Draw Condition - this handles what happens when the user clicks one of the choices where the value is them passed through as a parameter
-function draw(user, computer) {
-const userName = ' (user)'.fontsize(3).sup();
-const compName = ' (comp)'.fontsize(3).sup();
-result_div.innerHTML = `<p>It was a draw! You both chose ${convertCase(user)}</p>`;
-// "It was a draw! You both chose " + user + " " + computer; // old js
-const roundStatus = document.getElementById(user);
-roundStatus.classList.add('drawStyles');
-setTimeout(() => roundStatus.classList.remove('drawStyles'), 300);
+    if (gameEnded) return; // Prevent extra clicks
+    computerScore++;
+    computerScore_span.innerHTML = computerScore;
+    result_div.innerHTML = `<p>${convertCase(computer)} (comp) beats ${convertCase(user)} (user). You lose!</p>`;
+
+    if (computerScore === 7) {
+        showEndMessage("💀 Computer Wins! You Failed! Try Again. 💀", "💀");
+    }
 }
 
-// The core game functions that set up and determine the games actual logic aka paper beats rock etc
+// Draw function
+function draw(user) {
+    result_div.innerHTML = `<p>It was a draw! You both chose ${convertCase(user)}</p>`;
+}
+
+// Game logic
 function game(userChoice) {
-const computerChoice = getComputerChoice();
-// console.log('Game function: user choice is = ' + userChoice);
-// console.log('Game function: computer choice is = ' + computerChoice);
-switch (userChoice + computerChoice) {
-case 'paperrock':
-case 'rockscissors':
-case 'scissorspaper':
-win(userChoice, computerChoice);
-// console.log("user wins");
-break;
-case 'rockpaper':
-case 'scissorsrock':
-case 'paperscissors':
-loses(userChoice, computerChoice);
-// console.log("computer wins");
-break;
-case 'rockrock':
-case 'scissorsscissors':
-case 'paperpaper':
-draw(userChoice, computerChoice);
-console.log("draw");
-break;
-}
-}
-// ES5 style of writing this function
-// function main() {
-// rock_div.addEventListener('click', function() {
-// game('rock');
-// });
-// paper_div.addEventListener('click', function() {
-// game('paper');
-// });
-// scissors_div.addEventListener('click', function() {
-// game('scissors');
-// });
-// }
-// ES6 style of writing this function
-// This function creates and adds an eventlistener to the rock, paper scissors html element and the passes the value of that element to the game function
+    if (gameEnded) return; // Stop playing if game ended
+    const computerChoice = getComputerChoice();
 
-function main() {
-rock_div.addEventListener('click', () => game('rock'));
-paper_div.addEventListener('click', () => game('paper'));
-scissors_div.addEventListener('click', () => game('scissors'));
+    switch (userChoice + computerChoice) {
+        case 'paperrock':
+        case 'rockscissors':
+        case 'scissorspaper':
+            win(userChoice, computerChoice);
+            break;
+        case 'rockpaper':
+        case 'scissorsrock':
+        case 'paperscissors':
+            loses(userChoice, computerChoice);
+            break;
+        default:
+            draw(userChoice);
+    }
 }
-main();
+
+// Event listeners
+function main() {
+    rock_div.addEventListener('click', () => game('rock'));
+    paper_div.addEventListener('click', () => game('paper'));
+    scissors_div.addEventListener('click', () => game('scissors'));
+    newGameBtn.addEventListener("click", resetGame);
+}
+
+// Wait until DOM is fully loaded before running JS
+document.addEventListener("DOMContentLoaded", function() {
+    main();
+});
